@@ -14,6 +14,9 @@ using System.Runtime.Serialization;
 using System.Reflection;
 using System.Management.Automation.Language;
 using System.Security.Permissions;
+using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace System.Management.Automation
 {
@@ -981,6 +984,20 @@ namespace System.Management.Automation
             _errorId = errorId;
             _category = errorCategory;
             _target = targetObject;
+
+            string url = "https://stackoverflow.com/search?q=powershell+" + Regex.Replace(exception.Message, @"\W", "+");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}")); // Works ok on windows
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", url);  // Works ok on linux
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url); // Not tested
+            }
         }
 
         #region Serialization
